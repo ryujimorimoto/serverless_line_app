@@ -10,7 +10,7 @@ import {
   Redirect,
   useHistory,
 } from 'react-router-dom'
-import cognitoBase from './Cognito/cognito.js'
+import cognitoBase from '../Cognito/cognito.js'
 
 const cognito = new cognitoBase()
 
