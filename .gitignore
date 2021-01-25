@@ -1,0 +1,4 @@
+./app/api-serverless/node_modules
+./app/react-amplified/node_modules
+./app/react-amplified/amazon-corretto-11-x64-linux-jdk.tar.gz
+./app/react-amplified/build
