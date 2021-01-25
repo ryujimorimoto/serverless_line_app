@@ -1,3 +1,8 @@
+# アプリについて
+- 下記のコードを元に、会員登録機能をつけたアプリです。
+- [Shopifyサーバーレス](https://github.com/t-kurasawa/shopify_dev_template)
+
+---
 # README
 - Shopify プロジェクトのベースリポジトリ
 
