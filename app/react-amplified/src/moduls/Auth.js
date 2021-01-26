@@ -42,12 +42,17 @@ class Auth extends React.Component {
 // shop: "xn-eeuway0cad4fuavbe0ora14a.myshopify.com"
 // timestamp: "1611292816"
     const shopOrigin = query.shop;
+    /**
+     *  Shop ドメインが存在しなければ、ドメイン入力画面へリダイレクト
+     */
+    if(typeof shopOrigin == 'undefined'){
+      window.location.assign(process.env.REACT_APP_APPLICATION_URL + '/shop_domain');
+    }
 
     /**
      *  Shop 登録済ならばアプリトップへリダイレクト
      */
     const shopExist = await this.shopExist(shopOrigin)
-
     
     if(shopExist){
       // If the current window is the 'parent', change the URL by setting location.href      

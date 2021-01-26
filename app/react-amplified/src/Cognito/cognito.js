@@ -6,7 +6,7 @@ import {
   CognitoUserPool
 } from 'amazon-cognito-identity-js'
 import awsConfiguration from './awsConfiguration'
-import awsmobile from './aws-exports'
+import awsmobile from '../aws-exports'
 export default class Cognito {
   constructor(){
     if (this.userPool) {

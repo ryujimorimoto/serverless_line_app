@@ -15,7 +15,7 @@ import { Heading, Button } from '@shopify/polaris'
 import { makeStyles } from '@material-ui/core/styles';
 import { parse } from 'query-string';
 import axiosBase from 'axios';
-import cognitoBase from './Cognito/cognito.js'
+import cognitoBase from '../Cognito/cognito.js'
 import { Redirect } from 'react-router-dom'
 
 const cognito = new cognitoBase()

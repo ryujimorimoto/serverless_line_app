@@ -13,7 +13,7 @@ import { parse } from 'query-string';
 
 import { Redirect } from '@shopify/app-bridge/actions';
 import createApp from '@shopify/app-bridge';
-import cognitoBase from './Cognito/cognito.js'
+import cognitoBase from '../Cognito/cognito.js'
 const cognito = new cognitoBase()
 
 export default function SignIn(props) {
@@ -363,8 +363,7 @@ export default function SignIn(props) {
       >
 
         <Frame topBar={topBarMarkup}>
-        {showFlashBanner}
-
+          {showFlashBanner}
           {contextualSaveBarMarkup}
           {pageMarkup}
           {showToast}

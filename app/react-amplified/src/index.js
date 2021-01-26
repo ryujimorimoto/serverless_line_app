@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import App from './pages/App';
+import * as serviceWorker from './moduls/serviceWorker';
 import Amplify from "aws-amplify";
-import awsExports from "./Cognito/aws-exports";
+import awsExports from "./aws-exports";
 Amplify.configure(awsExports);
 
 ReactDOM.render(
