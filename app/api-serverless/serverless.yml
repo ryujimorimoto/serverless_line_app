@@ -13,7 +13,7 @@ package:
 
 plugins:
   - serverless-webpack
-  - serverless-dotenv-plugin  
+  - serverless-dotenv-plugin
 
 provider:
   name: aws
@@ -30,7 +30,7 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: 'arn:aws:dynamodb:ap-northeast-1:*:*'
+      Resource: "arn:aws:dynamodb:ap-northeast-1:*:*"
   environment:
     SHOPIFY_API_KEY: ${env:SHOPIFY_API_KEY}
     SHOPIFY_API_SECRET: ${env:SHOPIFY_API_SECRET}
@@ -39,17 +39,19 @@ provider:
     REGION: ${env:REGION}
     PUBLIC_API_URL: ${env:PUBLIC_API_URL}
     PRIVATE_API_URL: ${env:PRIVATE_API_URL}
+    LINE_CHANNEL_SECRET: ${env:LINE_CHANNEL_SECRET}
+    LINE_ACCESS_TOKEN: ${env:LINE_ACCESS_TOKEN}
 
 functions:
   publicEndpoint:
     handler: index.handler
     events:
       - http:
-          path: '/api/public/{proxy+}'
+          path: "/api/public/{proxy+}"
           method: ANY
-          cors: 
+          cors:
             origins:
-              - '*'
+              - "*"
             headers:
               - Authorization
               - Content-Type
@@ -59,19 +61,39 @@ functions:
               - X-Amz-User-Agent
             allowCredentials: true
   cognitoAuth:
-    handler: './functions/util/cognitoAuth.authorize'
+    handler: "./functions/util/cognitoAuth.authorize"
+  lineEndpoint:
+    handler: "./functions/util/lineBots.handler"
+    events:
+      - http:
+        path: "/api/line/{proxy+}"
+        method: ANY
+        authorizer:
+          name: cognitoAuth
+          resultTtlInSeconds: 0
+        cors:
+          origins:
+            - "*"
+          headers:
+            - Authorization
+            - Content-Type
+            - X-Amz-Date
+            - X-Api-Key
+            - X-Amz-Security-Token
+            - X-Amz-User-Agent
+          allowCredentials: true
   privateEndpoint:
     handler: index.handler
     events:
       - http:
-          path: '/api/private/{proxy+}'
+          path: "/api/private/{proxy+}"
           method: ANY
           authorizer:
             name: cognitoAuth
-            resultTtlInSeconds: 0          
-          cors: 
+            resultTtlInSeconds: 0
+          cors:
             origins:
-              - '*'
+              - "*"
             headers:
               - Authorization
               - Content-Type
@@ -104,7 +126,7 @@ resources:
           - ADMIN_NO_SRP_AUTH
         GenerateSecret: false
 
-    TokenTable: 
+    TokenTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: Tokens
