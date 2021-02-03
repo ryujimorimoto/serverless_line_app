@@ -16,6 +16,23 @@ app.use(awsServerlessExpressMiddleware.eventContext())
  * Enable All CORS Requests
  * https://expressjs.com/en/resources/middleware/cors.html
 */ 
+
+
+
+// create LINE SDK client
+// const lineClient = new line.Client({
+//     channelAccessToken: process.env.LINE_ACCESS_TOKEN,
+//     channelSecret: process.env.LINE_CHANNEL_SECRET,
+//   }
+// );
+
+
+
+
+
+
+
+
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*")
   res.header(
@@ -199,6 +216,7 @@ app.post(`${process.env.PRIVATE_API_URL}/products/*`, (req, res) =>{
   // Add your code here
   res.json({success: 'post call succeed!', url: req.url, body: req.body})
 });
+
 
 /****************************
 * put method *
