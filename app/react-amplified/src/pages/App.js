@@ -18,10 +18,10 @@ import cognitoBase from '../Cognito/cognito.js'
 const cognito = new cognitoBase()
     const sleep = msec => new Promise(resolve => setTimeout(resolve, msec));
     class App extends React.Component{
+      
   render(){
     console.log("user:")
     console.log(cognito.userPool.getCurrentUser());
-
     return (
       <AppProvider i18n={translations}>
         <BrowserRouter>

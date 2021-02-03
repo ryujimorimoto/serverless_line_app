@@ -5,6 +5,8 @@ import App from './pages/App';
 import * as serviceWorker from './moduls/serviceWorker';
 import Amplify from "aws-amplify";
 import awsExports from "./aws-exports";
+import { request } from '@shopify/app-bridge/actions/AuthCode';
+
 Amplify.configure(awsExports);
 
 ReactDOM.render(
