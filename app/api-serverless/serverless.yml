@@ -63,7 +63,7 @@ functions:
   cognitoAuth:
     handler: "./functions/util/cognitoAuth.authorize"
   lineEndpoint:
-    handler: "./functions/util/lineBots.handler"
+    handler: "functions/util/lineBots.handler"
     events:
       - http:
         path: "/api/line/{proxy+}"
