@@ -8,7 +8,9 @@ export default function Dashboard() {
   
   return (
     <div style={{height: '500px'}}>
-     {LayoutFrame()}
+     <LayoutFrame>
+       <p>ダッシュボード</p>
+     </LayoutFrame>
     </div>
   );
 }

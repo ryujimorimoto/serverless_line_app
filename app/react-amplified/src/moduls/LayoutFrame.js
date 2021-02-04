@@ -3,7 +3,7 @@ import {AppProvider, TextStyle, ContextualSaveBar, Frame, Layout, Page, SettingT
 import CustomProviderTheme from "../additionalAtoms/CustomProviderTheme"
 import SideBar from "../moduls/SideBar"
 
-export default function LayoutFrame() {
+export default function LayoutFrame(props) {
   const skipToContentRef = useRef(null);
   const [mobileNavigationActive, setMobileNavigationActive] = useState(false);
   const defaultState = useRef({
@@ -58,7 +58,13 @@ export default function LayoutFrame() {
           skipToContentTarget={skipToContentRef.current}
           onNavigationDismiss={toggleMobileNavigationActive}
         >
-          
+          <Page>
+            <Layout>
+              <Layout.Section>
+                {props.children}
+              </Layout.Section>
+            </Layout>
+          </Page>
         </Frame>
       </AppProvider>
     </div>
