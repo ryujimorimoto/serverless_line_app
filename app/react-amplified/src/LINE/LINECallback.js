@@ -3,27 +3,39 @@ import axiosBase from 'axios';
 import {Button, TextField, Form, FormLayout, Spinner, Toast } from '@shopify/polaris';
 
 import LayoutFrame from "../moduls/LayoutFrame"
-import CustomTextField from "../additionalAtoms/CustomTextField"
-import Callback from '../moduls/Callback';
+import cognitoBase from '../Cognito/cognito.js'
+const cognito = new cognitoBase()
+
 
 export default function LINECallback() {
   const [lineMessage, setLineMessage] = useState('');
   const handleMessageChange = useCallback((value) => setLineMessage(value), []);
 
   async function lineConnectTest(message){
-    console.log(process.env.REACT_APP_LINE_API_URL)
+    const current_user = await cognito.userPool.getCurrentUser();
+    const user_session = current_user.getSession((err, session) => {
+      if (err) {
+          console.log(err)
+          return null
+        } else {
+        if (!session.isValid()) {
+          console.log(session)
+          return null
+        } else {
+          return session
+        }
+      }
+  });
+  const jwtToken = user_session.idToken.jwtToken;
     const axios = axiosBase.create({
-      baseURL: process.env.REACT_APP_LINE_API_URL,
+      baseURL: process.env.REACT_APP_PRIVATE_API_URL,
       headers: {
           'Content-Type': 'application/json',
-      },
+          'Authorization': 'Bearer ' + jwtToken
+        },
       responseType: 'json'
     })
-    let messageParams = new URLSearchParams()
-    messageParams.append("message", message)
-    const res = await axios.post(`/sendtest?message=${message}`);
-    console.log("res")
-    console.log(res)
+    const res = await axios.post(`/test?message=${message}`);
     if(res.data.exist){
       return true
     }else{
@@ -42,8 +54,10 @@ export default function LINECallback() {
     (<Spinner accessibilityLabel="ローディング..." size="large" color="teal" />)
   async function handleSendSubmit(e) {
     e.preventDefault();
+    setSendLoading(true)
     console.log(lineMessage)
     if (lineMessage == "") {
+      setSendLoading(false)
       return setErrorToast("入力がありません")
     }else{
       try {
@@ -52,6 +66,7 @@ export default function LINECallback() {
         console.log(err);
       }
     }
+    setSendLoading(false)
   }
 
   return (
