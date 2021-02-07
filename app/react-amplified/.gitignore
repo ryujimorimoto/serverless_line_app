@@ -45,3 +45,4 @@ amplifytools.xcconfig
 
 # amazon
 amazon-corretto-11-x64-linux-jdk.tar.gz
+.eslintcache
