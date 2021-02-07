@@ -7,6 +7,7 @@ var Shopify = require('shopify-api-node');
 var AWS = require("aws-sdk");
 var docClient = new AWS.DynamoDB.DocumentClient();
 var checkSignature = require('./util/shopifySignature.js')
+const line = require('@line/bot-sdk');
 
 // declare a new express app
 var app = express()
@@ -20,11 +21,11 @@ app.use(awsServerlessExpressMiddleware.eventContext())
 
 
 // create LINE SDK client
-// const lineClient = new line.Client({
-//     channelAccessToken: process.env.LINE_ACCESS_TOKEN,
-//     channelSecret: process.env.LINE_CHANNEL_SECRET,
-//   }
-// );
+const lineClient = new line.Client({
+    channelAccessToken: process.env.LINE_ACCESS_TOKEN,
+    channelSecret: process.env.LINE_CHANNEL_SECRET,
+  }
+);
 
 
 
@@ -52,7 +53,6 @@ app.use(function(req, res, next) {
 /**********************
  * get method *
  **********************/
-
 app.get(`${process.env.PUBLIC_API_URL}/oauth`, (req, res) =>{
   // Add your code here
   console.log('----GET /oauth----')
@@ -168,11 +168,122 @@ app.get(`${process.env.PRIVATE_API_URL}/products/*`, (req, res) =>{
   // Add your code here
   res.json({success: 'get call succeed!', url: req.url});
 });
+app.get(`${process.env.PRIVATE_API_URL}/line/followers`, (req, res) =>{
+  // Add your code here
+  console.log("req:", req);
+  try {
+    let userID_list = []
+    docClient.scan({
+        TableName: 'followers',
+    }, function(err, data) {
+        if(err){
+            console.log(err)
+        }else{
+          console.log("data:", data)
+          console.log("Items:", data.Items)
+          data.Items.forEach(function(Follower, index) {
+            console.log('■FollowerUID：', Follower.Follower);
+            userID_list.push(Follower.Follower);
+            
+          })
+        }
+    });
+    let userProfile_list = [];
+    userID_list.forEach(function(user_id, index) {
+      lineClient.getProfile(user_id).then((profile) => {
+        console.log(profile);
+        userProfile_list.push(profile);
+      });
+    });
+      
+    res.json(JSON.stringify(userID_list));
+  } catch (err) {
+    console.error(`[Error]: ${JSON.stringify(err)}`);
+    return err;
+  }    
+});
 
 /****************************
 * post method *
 ****************************/
 
+app.post(`${process.env.PRIVATE_API_URL}/test`, (req, res) =>{
+  console.log('----POST LINE API Connect Test----')
+
+  console.log(req.apiGateway.event.queryStringParameters)
+  console.log(req.query)
+  
+  const messageData = req.query.message;
+    console.log("◆TEXT:" + JSON.stringify(messageData)); //メッセージ内容表示
+    const postData =  {
+            "type": "text",
+            "text": messageData
+    }
+    try {
+      lineClient.pushMessage(process.env.LINE_USER_ID, postData);
+    } catch (error) {
+      console.log(error)
+    }
+});
+app.post(`${process.env.PUBLIC_API_URL}/linecallback`, (req, res) =>{
+  console.log('----POST LINE API Follow and UnFollow ----')
+    const event_data = req.body;
+    console.log('◆EVENT.BODY:', JSON.stringify(event_data));
+    const messageData = event_data.events && event_data.events[0];
+    console.log("◆USERID:" + JSON.stringify(messageData.source.userId));
+    console.log ("◆TYPE:" + messageData.type);
+
+    if (messageData.type == 'follow') {
+        console.log("◆USERID:" + JSON.stringify(messageData.source.userId + 'が友達追加'));
+        const follower = JSON.stringify(messageData.source.userId);
+        console.log("◆follower:" + follower);
+        const params = {
+            TableName: 'followers',
+            Item: {
+                Follower: follower
+            }
+        };
+        docClient.put(params, function(err, data) {
+            if (err) {
+                console.log('■PUTエラー：'+err)
+            }else{ 
+                console.log('■PUTデータ'+data)
+            }
+        });
+        lineClient.pushMessage(follower, {"type":"text", "text":''}); // カラメッセージをPush
+    } else if (messageData.type == 'unfollow') {
+        console.log("◆USERID:" + JSON.stringify(messageData.source.userId + 'が友達削除'));
+        const unfollower = JSON.stringify(messageData.source.userId);
+        console.log("◆unfollower:" + unfollower);
+        const params = {
+            TableName: 'followers',
+            Key: {
+                Follower: unfollower
+            }
+        };
+        docClient.delete(params, function(err, data) {
+            if (err) {
+                console.log('■DELETEエラー：'+err)
+            }else{
+                console.log('■DELETEデータ'+data);
+            }
+        });
+        lineClient.pushMessage(unfollower, {"type":"text", "text":''}); // カラメッセージをPush
+    } else if (messageData.type == 'message') {
+
+        const postData =  {
+            "type": "text",
+            "text": '自動返信は開発中です'
+        }
+        try {
+          lineClient.replyMessage(messageData.replyToken, postData);
+        } catch (error) {
+            console.log(error)
+        }
+    } else {
+        return;
+    }
+});
 app.post(`${process.env.PRIVATE_API_URL}/products`, (req, res) =>{
   console.log('----POST /products----')
   // TODO: Shop 情報はパラメータではなく、認証されたユーザーとshopidを紐づけて管理すること

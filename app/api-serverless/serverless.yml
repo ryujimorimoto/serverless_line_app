@@ -62,26 +62,6 @@ functions:
             allowCredentials: true
   cognitoAuth:
     handler: "./functions/util/cognitoAuth.authorize"
-  lineEndpoint:
-    handler: "./functions/util/lineBots.handler"
-    events:
-      - http:
-        path: "/api/line/{proxy+}"
-        method: ANY
-        authorizer:
-          name: cognitoAuth
-          resultTtlInSeconds: 0
-        cors:
-          origins:
-            - "*"
-          headers:
-            - Authorization
-            - Content-Type
-            - X-Amz-Date
-            - X-Api-Key
-            - X-Amz-Security-Token
-            - X-Amz-User-Agent
-          allowCredentials: true
   privateEndpoint:
     handler: index.handler
     events:
@@ -102,6 +82,26 @@ functions:
               - X-Amz-Security-Token
               - X-Amz-User-Agent
             allowCredentials: true
+  # lineEndpoint:
+  #   handler: "functions/util/lineBots.handler"
+  #   events:
+  #     - http:
+  #         path: "/api/line/{proxy+}"
+  #         method: ANY
+  #         authorizer:
+  #           name: cognitoAuth
+  #           resultTtlInSeconds: 0
+  #         cors:
+  #           origins:
+  #             - "*"
+  #           headers:
+  #             - Authorization
+  #             - Content-Type
+  #             - X-Amz-Date
+  #             - X-Api-Key
+  #             - X-Amz-Security-Token
+  #             - X-Amz-User-Agent
+  #           allowCredentials: true
 
 resources:
   Resources:

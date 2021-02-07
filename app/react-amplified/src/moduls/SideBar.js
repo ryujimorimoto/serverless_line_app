@@ -13,6 +13,11 @@ export default function SideBar() {
             url: '/top',
             label: 'ダッシュボード',
             icon: HomeMajor,
+          },
+          {
+            url: "/line_api/callback",
+            label: "LINE通知テスト用",
+            icon: SendMajor,
           }
         ]}
       />
@@ -22,7 +27,7 @@ export default function SideBar() {
       <Navigation.Section
         items={[
           {
-            url: '/path/to/place',
+            url: '/followers',
             label: '友達リスト',
             icon: ListMajor,
             badge: '15',

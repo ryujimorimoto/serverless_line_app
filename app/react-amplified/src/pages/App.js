@@ -6,6 +6,7 @@ import { BrowserRouter, Switch, Route,Redirect } from 'react-router-dom'
 import Auth from '../moduls/Auth'
 import Callback from '../moduls/Callback'
 import LINECallback from '../LINE/LINECallback'
+import LINEFollowers from '../LINE/LINEFollowers'
 import Top from './Top'
 import SignIn from './SignIn'
 import Verification from './Verification'
@@ -35,6 +36,7 @@ const cognito = new cognitoBase()
               <Route exact path='/verification/:email' component={Verification} />
               <Route path='/shop_domain' component={ShopDomain} />
               <Route path='/line_api/callback' component={LINECallback} />
+              <Route path='/followers' component={LINEFollowers} />
           </Switch>
         </BrowserRouter>
       </AppProvider>
