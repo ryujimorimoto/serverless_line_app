@@ -30,7 +30,10 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:ap-northeast-1:*:*"
+        - ses:*
+      Resource:
+        - "arn:aws:dynamodb:ap-northeast-1:*:*"
+        - "arn:aws:ses:ap-northeast-1:*"
   environment:
     SHOPIFY_API_KEY: ${env:SHOPIFY_API_KEY}
     SHOPIFY_API_SECRET: ${env:SHOPIFY_API_SECRET}
