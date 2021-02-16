@@ -27,16 +27,21 @@ const cognito = new cognitoBase()
       <AppProvider i18n={translations}>
         <BrowserRouter>
           <Switch>
-              <Route exact path='/top'>
-                {cognito.userPool.getCurrentUser() == null || cognito.userPool.getCurrentUser().getSession(function(error,session){return session}) == null ? <Redirect to="/sign_in" /> : <Dashboard/>  } 
-              </Route>
-              <Route path='/auth' component={Auth} />
-              <Route path='/callback' component={Callback} />
-              <Route path='/sign_in' component={SignIn} />
-              <Route exact path='/verification/:email' component={Verification} />
-              <Route path='/shop_domain' component={ShopDomain} />
+            <Route path='/auth' component={Auth} />
+            <Route path='/callback' component={Callback} />
+            <Route path='/sign_in' component={SignIn} />
+            <Route exact path='/verification/:email' component={Verification} />
+            <Route path='/shop_domain' component={ShopDomain} />
+          { cognito.userPool.getCurrentUser() == null || cognito.userPool.getCurrentUser().getSession(function(error,session){return session}) == null ? 
+            <Redirect to="/sign_in" />
+            :
+            <>
+              <Route exact path='/top' component={Dashboard} />
               <Route path='/line_api/callback' component={LINECallback} />
               <Route path='/followers' component={LINEFollowers} />
+            </>
+          }
+            
           </Switch>
         </BrowserRouter>
       </AppProvider>

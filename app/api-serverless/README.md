@@ -1,5 +1,17 @@
 # 森本メモ
 
+webhook の処理は、koa-router, @shopify/koa-shopify-webhooks, @shopify/koa-shopify-auth を使う。
+curl -X POST -H "Content-Type: application/json" -H "X-Shopify-Access-Token: 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" https://xn-eeuway0cad4fuavbe0ora14a.myshopify.com/admin/api/2021-01/webhooks.json -d "$(cat <<EOS
+{
+"webhook": {
+"topic": "products/update",
+"address": "arn:aws:events:ap-northeast-1::event-source/aws.partner/shopify.com/4795293/LineEventBridge",
+"format": "json"
+}
+}
+EOS
+)" | jq .
+
 - LINE BOT は、"/dev/api/line/{+proxy}" の URL で動作する。
 - この +proxy を任意に設定して、動作する lambda を変更したい。
 

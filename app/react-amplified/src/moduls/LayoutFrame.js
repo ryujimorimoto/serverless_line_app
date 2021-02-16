@@ -2,17 +2,29 @@ import React, {useCallback, useState, useRef} from 'react';
 import {AppProvider, TextStyle, ContextualSaveBar, Frame, Layout, Page, SettingToggle, TopBar} from '@shopify/polaris';
 import CustomProviderTheme from "../additionalAtoms/CustomProviderTheme"
 import SideBar from "../moduls/SideBar"
+import { PromoteMinor } from '@shopify/polaris-icons';
+import cognitoBase from '../Cognito/cognito.js'
+const cognito = new cognitoBase()
 
 export default function LayoutFrame(props) {
   const skipToContentRef = useRef(null);
   const [mobileNavigationActive, setMobileNavigationActive] = useState(false);
   const defaultState = useRef({
     emailFieldValue: "dharma@jadedpixel.com",
-    nameFieldValue: "Jaded Pixel"
   });
+  const handlerLogout = useCallback(() => {
+    cognito.logout();
+  }, [])
   const userMenuActions = [
     {
-      items: [{content: 'Community forums'}],
+      items: [
+        {
+          content: 'ログアウト', 
+          icon: PromoteMinor, 
+          onAction: handlerLogout,
+          destructive: true,
+        }
+      ],
     },
   ];
   const [userMenuActive, setUserMenuActive] = useState(false);
@@ -26,9 +38,9 @@ export default function LayoutFrame(props) {
   const UserMenu = (
 <TopBar.UserMenu
         actions={userMenuActions}
-        name="Ryuji"
+        name="Admin"
         detail={storeName}
-        initials="R"
+        initials="A"
         open={userMenuActive}
         onToggle={toggleUserMenuActive}
       />
@@ -47,6 +59,7 @@ export default function LayoutFrame(props) {
           onNavigationToggle={toggleMobileNavigationActive}
           />
   )
+  
   return (
     <div style={{height: '250px'}}>
       <AppProvider

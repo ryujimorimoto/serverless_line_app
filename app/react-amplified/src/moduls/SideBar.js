@@ -4,7 +4,6 @@ import {ChatMajor, ClockMajor, CustomerPlusMajor, CustomersMajor, HomeMajor, Lis
 
 
 export default function SideBar() {
-  
   return(
     <Navigation location="/">
       <Navigation.Section
@@ -30,7 +29,6 @@ export default function SideBar() {
             url: '/followers',
             label: '友達リスト',
             icon: ListMajor,
-            badge: '15',
           },
           {
             url: '/path/to/place',

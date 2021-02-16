@@ -41,8 +41,38 @@ provider:
     PRIVATE_API_URL: ${env:PRIVATE_API_URL}
     LINE_CHANNEL_SECRET: ${env:LINE_CHANNEL_SECRET}
     LINE_ACCESS_TOKEN: ${env:LINE_ACCESS_TOKEN}
-
+    SHARED_SECRET: ${env:SHARED_SECRET}
+    API_VERSION: ${env:API_VERSION}
 functions:
+  sendMailTest:
+    handler: sendMail.sendMail
+    events:
+      - http:
+          path: send-mail
+          method: post
+          cors: true
+  webhookEndpoint:
+    handler: webhook.handler
+    events:
+      - http:
+          path: "/webhook/public/{proxy+}"
+          method: ANY
+          cors:
+            origins:
+              - "*"
+            headers:
+              - Authorization
+              - Content-Type
+              - X-Amz-Date
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - X-Shopify-Topic
+              - X-Shopify-API-Version
+              - X-Shopify-Hmac-SHA256
+              - X-Shopify-Shop-Domain
+              - X-Shopify-Order-Id
+            allowCredentials: true
   publicEndpoint:
     handler: index.handler
     events:

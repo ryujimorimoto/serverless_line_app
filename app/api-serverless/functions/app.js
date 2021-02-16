@@ -168,35 +168,40 @@ app.get(`${process.env.PRIVATE_API_URL}/products/*`, (req, res) =>{
   // Add your code here
   res.json({success: 'get call succeed!', url: req.url});
 });
+
 app.get(`${process.env.PRIVATE_API_URL}/line/followers`, (req, res) =>{
   // Add your code here
   console.log("req:", req);
+  let params = {
+    TableName: 'followers'
+  }
   try {
-    let userID_list = []
-    docClient.scan({
-        TableName: 'followers',
-    }, function(err, data) {
-        if(err){
-            console.log(err)
-        }else{
-          console.log("data:", data)
-          console.log("Items:", data.Items)
-          data.Items.forEach(function(Follower, index) {
-            console.log('■FollowerUID：', Follower.Follower);
-            userID_list.push(Follower.Follower);
-            
-          })
-        }
-    });
     let userProfile_list = [];
-    userID_list.forEach(function(user_id, index) {
-      lineClient.getProfile(user_id).then((profile) => {
-        console.log(profile);
-        userProfile_list.push(profile);
+
+    docClient.scan(params, function(err, data) {
+      console.log("data:", data)
+    if(err){
+        console.log("err:", err)
+    }else{
+      console.log("data:", data)
+      console.log("Items:", data.Items)
+
+      data.Items.forEach(async function(Follower, index) {
+        console.log('■FollowerUID：', Follower.Follower);
+        console.log("名前：", Follower.name);
+        console.log("画像URL：", Follower.picture);
+        console.log("ステータスメッセージ", Follower.message);
+        console.log("言語", Follower.language);
+        userProfile_list.push([Follower.Follower, Follower.name, Follower.picture, Follower.message, Follower.language]);
       });
-    });
       
-    res.json(JSON.stringify(userID_list));
+      console.log("userProfile_list:", userProfile_list)
+
+      res.json(JSON.stringify(userProfile_list));
+    }
+  });
+    
+      
   } catch (err) {
     console.error(`[Error]: ${JSON.stringify(err)}`);
     return err;
@@ -225,8 +230,9 @@ app.post(`${process.env.PRIVATE_API_URL}/test`, (req, res) =>{
       console.log(error)
     }
 });
-app.post(`${process.env.PUBLIC_API_URL}/linecallback`, (req, res) =>{
-  console.log('----POST LINE API Follow and UnFollow ----')
+app.post(`${process.env.PUBLIC_API_URL}/linecallback`, (req, res, next) =>{
+  (async () => {
+    console.log('----POST LINE API Follow and UnFollow ----')
     const event_data = req.body;
     console.log('◆EVENT.BODY:', JSON.stringify(event_data));
     const messageData = event_data.events && event_data.events[0];
@@ -235,12 +241,18 @@ app.post(`${process.env.PUBLIC_API_URL}/linecallback`, (req, res) =>{
 
     if (messageData.type == 'follow') {
         console.log("◆USERID:" + JSON.stringify(messageData.source.userId + 'が友達追加'));
-        const follower = JSON.stringify(messageData.source.userId);
-        console.log("◆follower:" + follower);
+        const follower = messageData.source.userId;
+        console.log(follower);
+        const lineProfile = await lineClient.getProfile(follower);
+        console.log("lineProfile", lineProfile)
         const params = {
             TableName: 'followers',
             Item: {
-                Follower: follower
+                Follower: follower,
+                name: lineProfile.displayName,
+                picture: lineProfile.pictureUrl,
+                message: lineProfile.statusMessage,
+                language: lineProfile.language
             }
         };
         docClient.put(params, function(err, data) {
@@ -250,17 +262,17 @@ app.post(`${process.env.PUBLIC_API_URL}/linecallback`, (req, res) =>{
                 console.log('■PUTデータ'+data)
             }
         });
-        lineClient.pushMessage(follower, {"type":"text", "text":''}); // カラメッセージをPush
     } else if (messageData.type == 'unfollow') {
         console.log("◆USERID:" + JSON.stringify(messageData.source.userId + 'が友達削除'));
-        const unfollower = JSON.stringify(messageData.source.userId);
-        console.log("◆unfollower:" + unfollower);
+        const unfollower = messageData.source.userId;
+        console.log("◆unfollower:" + JSON.stringify(unfollower));
         const params = {
             TableName: 'followers',
             Key: {
                 Follower: unfollower
             }
         };
+        console.log("params:", params)
         docClient.delete(params, function(err, data) {
             if (err) {
                 console.log('■DELETEエラー：'+err)
@@ -268,7 +280,6 @@ app.post(`${process.env.PUBLIC_API_URL}/linecallback`, (req, res) =>{
                 console.log('■DELETEデータ'+data);
             }
         });
-        lineClient.pushMessage(unfollower, {"type":"text", "text":''}); // カラメッセージをPush
     } else if (messageData.type == 'message') {
 
         const postData =  {
@@ -283,6 +294,7 @@ app.post(`${process.env.PUBLIC_API_URL}/linecallback`, (req, res) =>{
     } else {
         return;
     }
+  })().catch(next);
 });
 app.post(`${process.env.PRIVATE_API_URL}/products`, (req, res) =>{
   console.log('----POST /products----')
