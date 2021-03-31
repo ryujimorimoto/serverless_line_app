@@ -88,7 +88,7 @@ export default function SideBar() {
       <Navigation.Section
         items={[
           {
-            url: '/path/to/place',
+            url: '/my_page',
             label: 'マイアカウント',
             icon: ProfileMajor,
           },
