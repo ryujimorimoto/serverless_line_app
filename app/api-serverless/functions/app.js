@@ -50,6 +50,7 @@ app.use(function(req, res, next) {
   next()
 });
 
+
 /**********************
  * get method *
  **********************/
