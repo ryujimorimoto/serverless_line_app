@@ -18,17 +18,18 @@ export default class Cognito {
       })
     }
   }
-
   /*
     username, passwordでサインアップ
     username = emailとしてUserAttributeにも登録
    */
-  signUp (username, password) {
-    const dataEmail = { Name: 'email', Value: username }
+  signUp (email, password, name) {
+    const dataEmail = { Name: 'email', Value: email }
     const attributeList = []
     attributeList.push(new CognitoUserAttribute(dataEmail))
+    const dataName = { Name: 'name', Value: name }
+    attributeList.push(new CognitoUserAttribute(dataName))
     return new Promise((resolve, reject) => {
-      this.userPool.signUp(username, password, attributeList, null, (err, result) => {
+      this.userPool.signUp(email, password, attributeList, null, (err, result) => {
         if (err) {
           reject(err)
         } else {
@@ -37,14 +38,12 @@ export default class Cognito {
       })
     })
   }
-
   /*
     確認コードからユーザーを有効化する
    */
   confirmation (username, confirmationCode) {
     const userData = { Username: username, Pool: this.userPool }
     const cognitoUser = new CognitoUser(userData)
-
     return new Promise((resolve, reject) => {
       cognitoUser.confirmRegistration(confirmationCode, true, (err, result) => {
         if (err) {
@@ -55,7 +54,6 @@ export default class Cognito {
       })
     })
   }
-
   /*
    username, passwordでログイン
    */
@@ -64,7 +62,6 @@ export default class Cognito {
     const cognitoUser = new CognitoUser(userData)
     const authenticationData = { Username: username, Password: password }
     const authenticationDetails = new AuthenticationDetails(authenticationData)
-
     return new Promise((resolve, reject) => {
       cognitoUser.authenticateUser(authenticationDetails, {
         onSuccess: (result) => {
@@ -76,7 +73,6 @@ export default class Cognito {
       })
     })
   }
-
   changePassword (oldPassword, newPassword) {
     var cognitoUser = this.userPool.getCurrentUser()
     return new Promise((resolve, reject) => {
@@ -95,7 +91,6 @@ export default class Cognito {
       })
     })
   }
-
   forgotPassword (username) {
     const userData = { Username: username, Pool: this.userPool }
     const cognitoUser = new CognitoUser(userData)
@@ -110,7 +105,6 @@ export default class Cognito {
       })
     })
   }
-
   confirmForgotPassword (username, confirmationCode, newPassword) {
     const userData = { Username: username, Pool: this.userPool }
     const cognitoUser = new CognitoUser(userData)
@@ -125,7 +119,6 @@ export default class Cognito {
       })
     })
   }
-
   delete () {
     var cognitoUser = this.userPool.getCurrentUser()
     return new Promise((resolve, reject) => {
@@ -144,7 +137,6 @@ export default class Cognito {
       })
     })
   }
-
   /*
     ログアウト
    */
@@ -153,7 +145,6 @@ export default class Cognito {
     this.userPool.getCurrentUser().signOut();
     window.location.href = "/top";
   }
-
   /*
     ログインしているかの判定
    */

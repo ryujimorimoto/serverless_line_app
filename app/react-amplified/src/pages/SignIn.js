@@ -10,12 +10,10 @@ import {
   useHistory
 } from 'react-router-dom'
 import { parse } from 'query-string';
-
 import { Redirect } from '@shopify/app-bridge/actions';
 import createApp from '@shopify/app-bridge';
 import cognitoBase from '../Cognito/cognito.js'
 const cognito = new cognitoBase()
-
 export default function SignIn(props) {
   // タブ定義
   const params = parse(window.location.search);
@@ -39,23 +37,18 @@ export default function SignIn(props) {
       panelID: 'sign_in',
     },
   ];
-
   // タブ定義 終了
-
   // レイアウト定義
   const [isDirty, setIsDirty] = useState(false);
   const [searchFieldValue, setSearchFieldValue] = useState('');
-
   const handleSearchChange = useCallback(
     (searchFieldValue) => setSearchFieldValue(searchFieldValue),
     [],
   );
-
   const toggleIsDirty = useCallback(
     () => setIsDirty((isDirty) => !isDirty),
     [],
   );
-
   const theme = {
     colors: {
       topBar: {
@@ -76,7 +69,6 @@ export default function SignIn(props) {
         'https://cdn.shopify.com/s/files/1/0446/6937/files/jaded-pixel-logo-gray.svg?6215648040070010999',
     },
   };
-
   const searchFieldMarkup = (
     <TopBar.SearchField
       placeholder="Search"
@@ -84,12 +76,9 @@ export default function SignIn(props) {
       onChange={handleSearchChange}
     />
   );
-
   const topBarMarkup = <TopBar searchField={searchFieldMarkup} />;
-
   const contentStatus = isDirty ? 'Disable' : 'Enable';
   const textStatus = isDirty ? 'enabled' : 'disabled';
-
   const contextualSaveBarMarkup = isDirty ? (
     <ContextualSaveBar
       message="Unsaved changes"
@@ -102,6 +91,7 @@ export default function SignIn(props) {
     />
   ) : null;
   const [emailFieldValue, setEmailFieldValue] = useState('');
+  const [nameFieldValue, setNameFieldValue] = useState('');
   const [passwordFieldValue, setPasswordFieldValue] = useState('');
   const [passwordConfirmFieldValue, setPasswordConfirmFieldValue] = useState('');
   const [signUpLoading, setSingUpLoading] = useState(false)
@@ -109,17 +99,18 @@ export default function SignIn(props) {
   const [flashBanner, setFlashBanner] = useState(false)
   const toggleErrorToast = useCallback(() => setErrorToast((errorToast) => !errorToast), []);
   const toggleFlashBanner = useCallback(() => setFlashBanner((flashBanner) => !flashBanner), []);
-
   const handleEmailFieldChange = useCallback(
     (value) => setEmailFieldValue(value),
     [],
   );
-  
+  const handleNameFieldChange = useCallback(
+    (value) => setNameFieldValue(value),
+    [],
+  );
   const handlePasswordFieldChange = useCallback(
     (value) => setPasswordFieldValue(value),
     [],
   );
-
   const handlePasswordConfirmFieldChange = useCallback(
     (value) => setPasswordConfirmFieldValue(value),
     [],
@@ -138,15 +129,12 @@ export default function SignIn(props) {
       <p>ログインしてください</p>
     </Banner>
   ) : null;
-    
   const store_url = window.location.ancestorOrigins["0"] == null ? undefined : window.location.ancestorOrigins["0"].replace("https://","").replace("http://", "");
   const [shopFieldValue, setShopFieldValue] = useState(store_url);
-
   const handleShopFieldChange = useCallback(
     (value) => setShopFieldValue(value),
     [],
   );
-
   const shopFormMarkup = (
     store_url == null ? 
     (<TextField 
@@ -161,7 +149,6 @@ export default function SignIn(props) {
       placeholder="shop.shopify.com"
       />) : null
   );
-  
   const signInMarkup = (
         <Card.Section id="sign_in">
           <Layout>
@@ -171,7 +158,6 @@ export default function SignIn(props) {
             >
               <Card sectioned>
               <Form onSubmit={handleSignInSubmit}>
-
                 <FormLayout>
                   {shopFormMarkup}
                   <TextField 
@@ -196,7 +182,6 @@ export default function SignIn(props) {
                   {signInSubmitButton}
                 </FormLayout>
                 </Form>
-
               </Card>
             </Layout.AnnotatedSection>
           </Layout>
@@ -214,6 +199,16 @@ export default function SignIn(props) {
                 <Form onSubmit={handleSignUpSubmit}>
                 <FormLayout>
                   <TextField 
+                  type="text" 
+                  label="お名前" 
+                  onChange={handleNameFieldChange} 
+                  value={nameFieldValue} 
+                  areaExpand={true}
+                  autoFocus={true}
+                  inputMode="text"
+                  placeholder="お名前"
+                  />
+                  <TextField 
                   type="email" 
                   label="メールアドレス" 
                   onChange={handleEmailFieldChange} 
@@ -225,7 +220,7 @@ export default function SignIn(props) {
                   />
                   <TextField 
                   type="password" 
-                  label="パスワード" 
+                  label="パスワード(半角小文字・大文字英字、記号、半角数字を含む8桁以上)" 
                   onChange={handlePasswordFieldChange} 
                   value={passwordFieldValue} 
                   placeholder="パスワード"
@@ -237,9 +232,7 @@ export default function SignIn(props) {
                   value={passwordConfirmFieldValue} 
                   placeholder="パスワードの確認"
                   />
-
                   {signUpSubmitButton}
-                  
                 </FormLayout>
                 </Form>
               </Card>
@@ -247,25 +240,20 @@ export default function SignIn(props) {
           </Layout>
         </Card.Section>
       )
-
   const pageMarkup = (
     <Page title="">
       <Tabs tabs={tabs} selected={selected} onSelect={handleTabChange} fitted>
         {selected == 1 ? signInMarkup : signUpMarkup}
       </Tabs>
     </Page>
-
   );
-
   // レイアウト定義 終了
   // Formのsubmit処理
   async function handleSignInSubmit(e) {
     e.preventDefault()
-    
 　　//fromで送られてきた値を処理する
     try {
       setSingUpLoading(true)
-
       const app = createApp({
         apiKey: process.env.REACT_APP_SHOPIFY_API_KEY,
         shopOrigin: shopFieldValue
@@ -278,36 +266,17 @@ export default function SignIn(props) {
     } catch {
       setErrorToast("メールアドレスまたはパスワードが違います")
     }
-
     setSingUpLoading(false)
   }
-
   async function handleSignUpSubmit(e) {
     e.preventDefault()
-
     //パスワードの一致値チェック
     if (passwordFieldValue !== passwordConfirmFieldValue) {
       return setErrorToast("パスワードが一致しません")
     }
-
     try {
       setSingUpLoading(true)
-      await cognito.signUp( emailFieldValue, passwordFieldValue)
-      // codeDeliveryDetails: {AttributeName: "email", DeliveryMedium: "EMAIL", Destination: "f***@g***.com"}
-      // user: CognitoUser
-      //   Session: null
-      //   authenticationFlowType: "USER_SRP_AUTH"
-      //   client: Client {endpoint: "https://cognito-idp.ap-northeast-1.amazonaws.com/", fetchOptions: {…}}
-      //   keyPrefix: "CognitoIdentityServiceProvider.35ckqdcg2bh1g0vg7dbeb2seam"
-      //   pool: CognitoUserPool {userPoolId: "ap-northeast-1_zIC5ulkB0", clientId: "35ckqdcg2bh1g0vg7dbeb2seam", client: Client, advancedSecurityDataCollectionFlag: true, storage: Storage}
-      //   signInUserSession: null
-      //   storage: Storage {CognitoIdentityServiceProvider.35ckqdcg2bh1g0vg7dbeb2seam.fe111596-3235-436e-8c53-c3b8e820a469.accessToken: "eyJraWQiOiJPMXN4OGRSdkZnZURkTWZqT09SVFhnRXpvZ0N6dm…qrKe8-I--zdc5mRiMFOklswcxDS3b2Kak2aL6VR-LIIbKjiTQ", CognitoIdentityServiceProvider.35ckqdcg2bh1g0vg7dbeb2seam.fe111596-3235-436e-8c53-c3b8e820a469.idToken: "eyJraWQiOiI4YnhSc2YzTUJ0MVczXC9lQXdnY3JoSUxZYjd6aW…fTMtFxGU3Od8_LIBQm3jCGc2AFUQhR5ySHl8U961C8aFk3mmw", CognitoIdentityServiceProvider.35ckqdcg2bh1g0vg7dbeb2seam.fe111596-3235-436e-8c53-c3b8e820a469.clockDrift: "0", graphiql:queries: "{"queries":[{"query":"query {\n  testField\n}","va…  body,\n#     }\n#   }\n# }","variables":null}]}", graphiql:query: "query {↵  postsCount,↵  posts {↵    title,↵    bod…d,↵#       title,↵#       body,↵#     }↵#   }↵# }", …}
-      //   userDataKey: "CognitoIdentityServiceProvider.35ckqdcg2bh1g0vg7dbeb2seam.forest.book1213+1@gmail.com.userData"
-      //   username: "forest.book1213+1@gmail.com"
-      // __proto__: Object
-      // userConfirmed: false
-      // userSub: "28069ed7-1df4-4bee-a243-066dc45daa8a"
-
+      await cognito.signUp( emailFieldValue, passwordFieldValue, nameFieldValue)
       // アカウント登録が成功したら、認証ページへリダイレクトさせている
       history.push( "/verification/" + emailFieldValue)
       // document.location.href = "/verification/" + emailFieldValue;
@@ -326,20 +295,15 @@ export default function SignIn(props) {
       }
       setErrorToast(errorMessage)
     }
-
     setSingUpLoading(false)
   }
-
   // Formのsubmit処理 終了
   useEffect(() => {
     if( Object.keys(params).includes("flash") ){
       return setFlashBanner(params["flash"]);
     }
   }, [])
-  
-  
     return (
-      
       <div style={{height: '250px'}}>
       <AppProvider
         theme={theme}
@@ -361,7 +325,6 @@ export default function SignIn(props) {
           },
         }}
       >
-
         <Frame topBar={topBarMarkup}>
           {showFlashBanner}
           {contextualSaveBarMarkup}
@@ -369,8 +332,6 @@ export default function SignIn(props) {
           {showToast}
         </Frame>
       </AppProvider>
-      
 </div>
-
     );
 };
