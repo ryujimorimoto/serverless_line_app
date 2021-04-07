@@ -8,12 +8,11 @@ var AWS = require("aws-sdk");
 var docClient = new AWS.DynamoDB.DocumentClient();
 var checkSignature = require('./util/shopifySignature.js')
 const line = require('@line/bot-sdk');
-console.log('----1----')
+
 // declare a new express app
 var app = express()
 app.use(bodyParser.json())
 app.use(awsServerlessExpressMiddleware.eventContext())
-console.log('----2----')
 /**
  * Enable All CORS Requests
  * https://expressjs.com/en/resources/middleware/cors.html
@@ -22,11 +21,11 @@ console.log('----2----')
 
 
 // create LINE SDK client
-// const lineClient = new line.Client({
-//     channelAccessToken: process.env.LINE_ACCESS_TOKEN,
-//     channelSecret: process.env.LINE_CHANNEL_SECRET,
-//   }
-// );
+const lineClient = new line.Client({
+    channelAccessToken: process.env.LINE_ACCESS_TOKEN,
+    channelSecret: process.env.LINE_CHANNEL_SECRET,
+  }
+);
 
 
 
@@ -50,7 +49,7 @@ app.use(function(req, res, next) {
   )
   next()
 });
-console.log('----3----')
+
 
 /**********************
  * get method *
