@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import axiosBase from 'axios';
+import { useState, useEffect, useCallback } from 'react';
 import {Button, TextField, Form, FormLayout, Spinner, Toast } from '@shopify/polaris';
 
 import LayoutFrame from "../moduls/LayoutFrame"
 import cognitoBase from '../Cognito/cognito.js'
+import { Link } from 'react-router-dom'
+
 const cognito = new cognitoBase()
 const cognitoUser = cognito.userPool.getCurrentUser();
 
@@ -24,6 +25,7 @@ function handleSubmit(e, nameValue, emailValue) {
   e.preventDefault()
   const attributeList = buildAttributeList(nameValue, emailValue)
 
+  // todo: このupdateAttributessはcognito.jsへうつす
   cognitoUser.updateAttributes(attributeList, function(err, result) {
 	if (err) {
 		alert(err.message || JSON.stringify(err));
@@ -34,6 +36,7 @@ function handleSubmit(e, nameValue, emailValue) {
 }
 
 function setDefaultValue(setName, setEmail) {
+  // todo: このgetUserAttributesはcognito.jsへうつす？（でもstate使ってる）
   cognitoUser.getSession(function(err, session) {
     if (err) {
         console.log(err);
@@ -85,27 +88,12 @@ export default function MyPage() {
             label="Email"
             type="text"
           />
-          <TextField
-            value={oldPasswordValue}
-            onChange={(value) => setOldPassword(value)}
-            label="Enter your old password."
-            type="password"
-          />
-          <TextField
-            value={newPasswordValue}
-            onChange={(value) => setNewPassword(value)}
-            label="Enter your new password."
-            type="password"
-          />
-          <TextField
-            value={newPasswordConfirmValue}
-            onChange={(value) => setNewPasswordConfirm(value)}
-            label="Enter your new password again."
-            type="password"
-          />
           <Button size="big" submit>送信</Button>
         </FormLayout>
       </Form>
+      <div>
+        <Link to="/change_password">パスワードを変更します</Link>
+      </div>
     </LayoutFrame>
   )
 }
