@@ -13,6 +13,7 @@ import Verification from './Verification'
 import ShopDomain from './ShopDomain'
 import Dashboard from './Dashboard'
 import MyPage from './MyPage'
+import ChangePassword from './ChangePassword'
 
 import { parse } from 'query-string';
 
@@ -41,6 +42,7 @@ const cognito = new cognitoBase()
               <Route path='/line_api/callback' component={LINECallback} />
               <Route path='/followers' component={LINEFollowers} />
               <Route path='/my_page' component={MyPage} />
+              <Route path='/change_password' component={ChangePassword} />
             </>
           }
             
