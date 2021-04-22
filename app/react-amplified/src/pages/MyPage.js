@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import {Button, TextField, Form, FormLayout, Spinner, Toast } from '@shopify/polaris';
+import {Button, TextField, Form, FormLayout, Card, Stack, Collapsible, TextContainer, Layout } from '@shopify/polaris';
 import LayoutFrame from "../moduls/LayoutFrame"
 import { useHistory } from 'react-router-dom'
 import cognitoBase from '../Cognito/cognito.js'
@@ -18,6 +18,9 @@ export default function MyPage() {
   const [nameValue, setName] = useState("");
   const [emailValue, setEmail] = useState("");
   const [beforeEmailValue, setBeforeEmail] = useState("");
+  const [open, setOpen] = useState(false);
+  const handleToggle = useCallback(() => setOpen((open) => !open), []);
+  const history = useHistory();
 
   useEffect(() => {
     setDefaultValue();
@@ -109,6 +112,13 @@ export default function MyPage() {
     });
   }
 
+  function delete_current_user() {
+    if (window.confirm("本当に削除してよろしいですか？\n\n※削除したアカウントは元に戻すことができません。")) {
+      cognito.delete();
+      history.go(0);
+    }
+  }
+
   return (
     <LayoutFrame>
       <div style={{margin: "50px 0", fontSize: "3em"}}>
@@ -118,24 +128,46 @@ export default function MyPage() {
         <FormLayout>
           <TextField
             value={nameValue}
-            onChange={(value) => setName(value)}
+            onChange={value => setName(value)}
             label="Name"
             type="text"
           />
           <TextField
             value={emailValue}
-            onChange={(value) => setEmail(value)}
+            onChange={value => setEmail(value)}
             label="Email"
             type="text"
           />
           <Link onClick={() => verificateEmail()}>認証コード再入力</Link>
           <Button size="big" submit>送信</Button>
+          <Link to="/change_password">パスワードを変更したい方はこちら</Link>
         </FormLayout>
       </Form>
-      
-      <div>
-        <Link to="/change_password">パスワードを変更します</Link>
-      </div>
+      <hr style={{margin: "20px 0"}}/>
+      <Stack vertical>
+        <Button
+          onClick={handleToggle}
+          ariaExpanded={open}
+          ariaControls="basic-collapsible"
+        >
+          アカウントの削除について
+        </Button>
+        <Collapsible
+          open={open}
+          id="basic-collapsible"
+          transition={{duration: '500ms', timingFunction: 'ease-in-out'}}
+          expandOnPrint
+        >
+          <TextContainer>
+            <p>
+              もし、現在お使いのアカウントを削除したい場合は以下のリンクをクリックし、「はい」を選択してください。<br/>
+              ※ 一度削除されたアカウントは元に戻すことはできませんのでご注意ください。
+            </p>
+            <br/>
+            <Link to="#" onClick={e => delete_current_user(e)}>アカウントを削除します</Link>
+            </TextContainer>
+        </Collapsible>
+      </Stack>
     </LayoutFrame>
-  )
-}
+    )
+  }

@@ -91,7 +91,7 @@ export default function ChangePassword() {
         </FormLayout>
       </Form>
       <div>
-        <Link to="/my_page">ユーザー情報を変更します</Link>
+        <Link to="/my_page">ユーザー情報を変更したい方はこちら</Link>
       </div>
     </LayoutFrame>
   )
