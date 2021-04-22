@@ -1,74 +1,114 @@
 import { useState, useEffect, useCallback } from 'react';
 import {Button, TextField, Form, FormLayout, Spinner, Toast } from '@shopify/polaris';
-
 import LayoutFrame from "../moduls/LayoutFrame"
+import { useHistory } from 'react-router-dom'
 import cognitoBase from '../Cognito/cognito.js'
 import { Link } from 'react-router-dom'
+import axiosBase from 'axios';
+
+
 
 const cognito = new cognitoBase()
 const cognitoUser = cognito.userPool.getCurrentUser();
 
-function buildAttributeList(nameValue, emailValue) {
-  return [
-    {
-      Name: 'name',
-      Value: nameValue,
-    },
-    {
-      Name: 'email',
-      Value: emailValue,
-    }
-  ]
-}
 
-function handleSubmit(e, nameValue, emailValue) {
-  e.preventDefault()
-  const attributeList = buildAttributeList(nameValue, emailValue)
 
-  // todo: このupdateAttributessはcognito.jsへうつす
-  cognitoUser.updateAttributes(attributeList, function(err, result) {
-	if (err) {
-		alert(err.message || JSON.stringify(err));
-		return;
-	}
-	console.log('call result: ' + result);
-});
-}
-
-function setDefaultValue(setName, setEmail) {
-  // todo: このgetUserAttributesはcognito.jsへうつす？（でもstate使ってる）
-  cognitoUser.getSession(function(err, session) {
-    if (err) {
-        console.log(err);
-    } else {
-      cognitoUser.getUserAttributes(function(err, result) {
-        if (err) {
-          console.log(err.message || JSON.stringify(err));
-        } else {
-          for (let i = 0; i < result.length; i++) {
-            if (result[i].getName() === "name") {
-              setName(result[i].getValue());
-            }
-            if (result[i].getName() === "email") {
-              setEmail(result[i].getValue());
-            }
-          }
-        }
-        return null;
-      })
-    }
-  });
-}
 
 export default function MyPage() {
   const [nameValue, setName] = useState("");
   const [emailValue, setEmail] = useState("");
-  const [oldPasswordValue, setOldPassword] = useState("");
-  const [newPasswordValue, setNewPassword] = useState("");
-  const [newPasswordConfirmValue, setNewPasswordConfirm] = useState("");
+  const [beforeEmailValue, setBeforeEmail] = useState("");
+
   useEffect(() => {
-    setDefaultValue(setName, setEmail)
+    setDefaultValue();
   },[])
+
+  function buildAttributeList() {
+    return [
+      {
+        Name: 'name',
+        Value: nameValue,
+      },
+      {
+        Name: 'email',
+        Value: emailValue,
+      }
+    ]
+  }
+
+  function setDefaultValue() {
+    cognitoUser.getSession(function(err, session) {
+      if (err) {
+          console.log(err);
+      } else {
+        cognitoUser.getUserAttributes(function(err, result) {
+          if (err) {
+            console.log(err.message || JSON.stringify(err));
+          } else {
+            for (let i = 0; i < result.length; i++) {
+              if (result[i].getName() === "name") {
+                setName(result[i].getValue());
+              }
+              if (result[i].getName() === "email") {
+                setEmail(result[i].getValue());
+                setBeforeEmail(result[i].getValue());
+              }
+            }
+          }
+          return null;
+        })
+      }
+    });
+  }
+
+  function verificateEmail() {
+    const verificationCode = prompt('変更したメールアドレスに認証コードを送りました。\n送信した認証コードを入力してください。\n※認証を行わない場合でもメールアドレスが変更されてしまうためご注意ください。\n※認証を行わない場合、ログインができなくなる可能性がありますのでご注意ください。', '');
+    cognitoUser.verifyAttribute("email", verificationCode, {
+      onSuccess: function(result) {
+        alert("認証に成功しました。");
+        return true;
+      },　
+      onFailure: function(err) {
+        alert(err.message || JSON.stringify(err));
+        return false;
+      }
+    });
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    //
+    // const app = axiosBase.create({
+    //   url: process.env.REACT_APP_COGNITO_API_URL,
+    //   headers: '*',
+    //   Authorization: "Bearer " + "#jwtToken",
+    // });
+    // app.post('/create',{
+    //   email: "mail",
+    // 
+    // })
+    // .then((value) => {})
+    // .catch((err) => {})
+    
+    
+    
+    // 
+    const attributeList = buildAttributeList();
+
+    await cognitoUser.updateAttributes(attributeList, function(err, result) {
+    	if (err) {
+    		alert(err.message || JSON.stringify(err));
+    		return;
+    	}
+      // メアドが変更されていた場合の処理
+      if (beforeEmailValue !== emailValue) {
+        const isVerificated = verificateEmail();
+        console.log(isVerificated);
+        setBeforeEmail(emailValue)
+      }
+    });
+  }
+
   return (
     <LayoutFrame>
       <div style={{margin: "50px 0", fontSize: "3em"}}>
@@ -88,9 +128,11 @@ export default function MyPage() {
             label="Email"
             type="text"
           />
+          <Link onClick={() => verificateEmail()}>認証コード再入力</Link>
           <Button size="big" submit>送信</Button>
         </FormLayout>
       </Form>
+      
       <div>
         <Link to="/change_password">パスワードを変更します</Link>
       </div>

@@ -37,7 +37,6 @@ function handleSubmit(e, oldPasswordValue, newPasswordValue, newPasswordConfirmV
       }
     ).catch(
       (reject)=>{
-        console.log(reject);
         window.alert(reject.message);
         // switch (reject.code) {
         //   case "InvalidParameterException":
@@ -75,10 +74,11 @@ export default function ChangePassword() {
             label="Enter your old password."
             type="password"
           />
+          
           <TextField
             value={newPasswordValue}
             onChange={(value) => setNewPassword(value)}
-            label="Enter your new password."
+            label="Enter your new password（半角英数字記号（大文字・小文字・数字・記号）を各一つずつ以上含み、合計8文字以上になるように入力してください）"
             type="password"
           />
           <TextField
