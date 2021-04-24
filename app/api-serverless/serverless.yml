@@ -46,6 +46,7 @@ provider:
     LINE_ACCESS_TOKEN: ${env:LINE_ACCESS_TOKEN}
     SHARED_SECRET: ${env:SHARED_SECRET}
     API_VERSION: ${env:API_VERSION}
+    COGNITO_API_URL: ${env:COGNITO_API_URL}
 functions:
   sendMailTest:
     handler: sendMail.sendMail
@@ -115,6 +116,27 @@ functions:
               - X-Amz-Security-Token
               - X-Amz-User-Agent
             allowCredentials: true
+
+  cognitoEndpoint:
+    handler: cognito.handler
+    events:
+      - http:
+          path: "/users/{proxy+}"
+          method: ANY
+          authorizer:
+            name: cognitoAuth
+            resultTtlInSeconds: 0
+          cors:
+            origins:
+              - "*"
+            headers:
+              - Authorization
+              - Content-Type
+              - X-Amz-Date
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: true
   # lineEndpoint:
   #   handler: "functions/util/lineBots.handler"
   #   events:
@@ -168,6 +190,22 @@ resources:
             AttributeType: S
         KeySchema:
           - AttributeName: shop_id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TimeToLiveSpecification:
+          AttributeName: expired_at
+          Enabled: true
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Users
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+        KeySchema:
+          - AttributeName: username
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
