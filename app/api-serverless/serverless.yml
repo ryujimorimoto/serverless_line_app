@@ -47,6 +47,7 @@ provider:
     SHARED_SECRET: ${env:SHARED_SECRET}
     API_VERSION: ${env:API_VERSION}
     COGNITO_API_URL: ${env:COGNITO_API_URL}
+    PUBLIC_COGNITO_API_URL: ${env:PUBLIC_COGNITO_API_URL}
 functions:
   sendMailTest:
     handler: sendMail.sendMail
@@ -137,6 +138,23 @@ functions:
               - X-Amz-Security-Token
               - X-Amz-User-Agent
             allowCredentials: true
+  publicCognitoEndpoint:
+      handler: cognito.handler
+      events:
+        - http:
+            path: "/public/users/{proxy+}"
+            method: ANY
+            cors:
+              origins:
+                - "*"
+              headers:
+                - Authorization
+                - Content-Type
+                - X-Amz-Date
+                - X-Api-Key
+                - X-Amz-Security-Token
+                - X-Amz-User-Agent
+              allowCredentials: true
   # lineEndpoint:
   #   handler: "functions/util/lineBots.handler"
   #   events:
