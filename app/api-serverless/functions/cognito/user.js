@@ -70,12 +70,11 @@ app.post(`${process.env.COGNITO_API_URL}/create`, (req, res) =>{
 
   const token = crypto.randomBytes(64).toString("base64");
   const ses = new AWS.SES({region: process.env.REGION}); //メールを登録したリージョン
-  const shop_id = "shopOrigin"
   try {
     const params = {
       TableName: "Users",
       Item:{
-        shop_id: shop_id,
+        shop_id: req.body.shop_id,
         username: req.body.username,
         email: req.body.email,
         token: token
@@ -93,12 +92,12 @@ app.post(`${process.env.COGNITO_API_URL}/create`, (req, res) =>{
         const mail_params = {
           Source: 'cognac04@gmail.com',
           Destination: {
-            ToAddresses: ['cognac0004@gmail.com'],
-            // ToAddresses: [req.body.email], //配列で記述
+            // ToAddresses: ['cognac0004@gmail.com'],
+            ToAddresses: [req.body.email], //配列で記述
           },
           Message: {
             Subject: {
-              Data: '挨拶',
+              Data: '認証のお願い',
               Charset: 'utf-8',
             },
             Body: {
@@ -115,7 +114,7 @@ app.post(`${process.env.COGNITO_API_URL}/create`, (req, res) =>{
                   </head>
                   <body>
                     <h3>以下のURLをクリックして、メールアドレスを認証してください</h3><br/>
-                    ${process.env.PUBLIC_COGNITO_API_URL}/check/${req.body.username}?token=${token}&shop_id=${shop_id}
+                    ${process.env.PUBLIC_COGNITO_API_URL}/check/${req.body.username}?token=${token}&shop_id=${req.body.shop_id}
                   </body>
                 </html>
               `,

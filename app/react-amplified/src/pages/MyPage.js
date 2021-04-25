@@ -110,6 +110,8 @@ export default function MyPage() {
                 app.post('/create',{
                   username: cognitoUser.username,
                   email: emailValue,
+                  // TODO: 取得をして、ちゃんとしたものに変更する
+                  shop_id: "shopOrigin"
                 })
                 .then((value) => {
                   window.alert("変更後のメールアドレスに承認リンクを送信しました。\n変更する場合、そちらのメールアドレスをクリックしてください。");
