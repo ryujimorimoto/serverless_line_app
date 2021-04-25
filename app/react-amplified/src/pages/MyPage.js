@@ -5,13 +5,8 @@ import { useHistory } from 'react-router-dom'
 import cognitoBase from '../Cognito/cognito.js'
 import { Link } from 'react-router-dom'
 import axiosBase from 'axios';
-
-
-
 const cognito = new cognitoBase()
 const cognitoUser = cognito.userPool.getCurrentUser();
-
-
 
 
 export default function MyPage() {
@@ -32,10 +27,10 @@ export default function MyPage() {
         Name: 'name',
         Value: nameValue,
       },
-      {
-        Name: 'email',
-        Value: emailValue,
-      }
+      // {
+      //   Name: 'email',
+      //   Value: emailValue,
+      // }
     ]
   }
 
@@ -80,34 +75,73 @@ export default function MyPage() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    //
-    // const app = axiosBase.create({
-    //   url: process.env.REACT_APP_COGNITO_API_URL,
-    //   headers: '*',
-    //   Authorization: "Bearer " + "#jwtToken",
-    // });
-    // app.post('/create',{
-    //   email: "mail",
-    // 
-    // })
-    // .then((value) => {})
-    // .catch((err) => {})
-    
-    
-    
-    // 
-    const attributeList = buildAttributeList();
 
-    await cognitoUser.updateAttributes(attributeList, function(err, result) {
+    if(!window.confirm("ユーザー情報を更新してもよろしいですか？")) {
+      return;
+    }
+
+    await cognitoUser.updateAttributes(buildAttributeList(), function(err, result) {
     	if (err) {
     		alert(err.message || JSON.stringify(err));
     		return;
     	}
       // メアドが変更されていた場合の処理
       if (beforeEmailValue !== emailValue) {
-        const isVerificated = verificateEmail();
-        console.log(isVerificated);
-        setBeforeEmail(emailValue)
+        
+        
+        
+        
+        
+        
+        
+        cognitoUser.getSession((err, session) => {
+          if (err) {
+              console.log(err)
+              return null
+            } else {
+            if (!session.isValid()) {
+              console.log("session", session)
+              return null
+            } else {
+              // console.log("jwtToken", session.idToken.jwtToken);
+              // console.log("baseURL", process.env.REACT_APP_COGNITO_API_URL);
+              const app = axiosBase.create({
+                baseURL: process.env.REACT_APP_COGNITO_API_URL,
+                headers: {
+                  'Content-Type': 'application/json',
+                  "Authorization": "Bearer " + session.idToken.jwtToken
+                },
+                responseType: 'json'
+              });
+              app.get('/check/test?username=test')
+              // app.post('/create',{
+              //   username: 'test',
+              //   email: "mail@mail.com",
+              // })
+              .then((value) => {
+                setBeforeEmail(emailValue)
+                window.alert("変更後のメールアドレスに承認リンクを送信しました。\n変更する場合、そちらのメールアドレスをクリックしてください。");
+                console.dir("success",value);
+              })
+              .catch((err) => {
+                console.log("err",err)
+              });
+              
+              return session
+            }
+          }
+        });
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        // const isVerificated = verificateEmail();
+        // console.log(isVerificated);
       }
     });
   }
