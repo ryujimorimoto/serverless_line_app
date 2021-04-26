@@ -66,7 +66,7 @@ app.get(`/public${process.env.COGNITO_API_URL}/check/:username`, (req, res) =>{
             console.log(err, err.stack)
             res.json({failure: '変更に失敗しました'})
           } else {
-            console.log(data);
+            console.log("data: ", data);
             res.json({success: '変更に成功しました'})
           }
         });
@@ -91,9 +91,8 @@ app.post(`${process.env.COGNITO_API_URL}/create`, (req, res) =>{
   console.log('----- POST /users/create -----');
   console.log("req:", req);
 
-  // 「+」はクエリストリングスだと空白になってしまう
-  // const token = crypto.randomBytes(64).toString("base64");
-  const token = Math.random().toString(32)
+  // 「+」と「/」は置き換える
+  const token = crypto.randomBytes(64).toString("base64").replace('+', "-").replace('/', "_");
   const ses = new AWS.SES({region: process.env.REGION}); //メールを登録したリージョン
   try {
     const params = {
