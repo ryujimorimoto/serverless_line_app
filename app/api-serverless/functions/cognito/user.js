@@ -5,6 +5,7 @@ var awsServerlessExpressMiddleware = require('aws-serverless-express/middleware'
 var axiosBase = require('axios')
 var AWS = require("aws-sdk");
 var docClient = new AWS.DynamoDB.DocumentClient();
+var cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider();
 const crypto = require('crypto')
 
 
@@ -48,14 +49,36 @@ app.get(`/public${process.env.COGNITO_API_URL}/check/:username`, (req, res) =>{
     } else {
       const query_string = req.apiGateway.event.queryStringParameters
       const item = data.Item
-
+  
       if (query_string.token === item.token && query_string.shop_id === item.shop_id) {
         console.log("got item:", JSON.stringify(data, null, 2));
-        // TODO: ここで、管理者権限を用いたユーザーのemail更新を行う
-        res.json({success: '変更に成功'})
-      } else {
-        res.json({failure: '無効なURLです'})
-      }
+        const params = {
+            UserAttributes: [
+              { Name: 'email', Value: item.email },
+              { Name: 'email_verified', Value: 'true' }
+            ],
+            UserPoolId: process.env.COGNITO_USER_POOL_ID,
+            Username: item.username
+        };
+
+        cognitoidentityserviceprovider.adminUpdateUserAttributes(params, function(err, data) {
+          if (err) {
+            console.log(err, err.stack)
+            res.json({failure: '変更に失敗しました'})
+          } else {
+            console.log("data: ", data);
+            res.json({success: '変更に成功しました'})
+          }
+        });
+        return
+      };
+      console.log("=====================")
+      console.log(`token in db: ${item.token}, in params: ${query_string.token}`)
+      console.log(query_string.token === item.token)
+      console.log(`shop_id in db: ${item.shop_id}, in params: ${query_string.shop_id}`)
+      console.log(query_string.shop_id === item.shop_id)
+      console.log("=====================")
+      res.json({failure: 'URLが無効です'})
     }
   })
 });
@@ -68,7 +91,8 @@ app.post(`${process.env.COGNITO_API_URL}/create`, (req, res) =>{
   console.log('----- POST /users/create -----');
   console.log("req:", req);
 
-  const token = crypto.randomBytes(64).toString("base64");
+  // 「+」と「/」は置き換える
+  const token = crypto.randomBytes(64).toString("base64").replace('+', "-").replace('/', "_");
   const ses = new AWS.SES({region: process.env.REGION}); //メールを登録したリージョン
   try {
     const params = {
@@ -87,10 +111,10 @@ app.post(`${process.env.COGNITO_API_URL}/create`, (req, res) =>{
         res.json({error: err})
       } else {
         console.log("Added item:", JSON.stringify(data, null, 2));
-        // SESにてメールをおくる。
 
+        // SESにてメールをおくる。
         const mail_params = {
-          Source: 'cognac04@gmail.com',
+          Source: process.env.SENDER_EMAIL,
           Destination: {
             // ToAddresses: ['cognac0004@gmail.com'],
             ToAddresses: [req.body.email], //配列で記述

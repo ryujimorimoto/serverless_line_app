@@ -11,7 +11,6 @@ const cognitoUser = cognito.userPool.getCurrentUser();
 export default function MyPage() {
   const [nameValue, setName] = useState("");
   const [emailValue, setEmail] = useState("");
-  const [beforeEmailValue, setBeforeEmail] = useState("");
   const [open, setOpen] = useState(false);
   const handleToggle = useCallback(() => setOpen((open) => !open), []);
   const history = useHistory();
@@ -48,26 +47,11 @@ export default function MyPage() {
               }
               if (result[i].getName() === "email") {
                 setEmail(result[i].getValue());
-                setBeforeEmail(result[i].getValue());
               }
             }
           }
           return null;
         })
-      }
-    });
-  }
-
-  function verificateEmail() {
-    const verificationCode = prompt('変更したメールアドレスに認証コードを送りました。\n送信した認証コードを入力してください。\n※認証を行わない場合でもメールアドレスが変更されてしまうためご注意ください。\n※認証を行わない場合、ログインができなくなる可能性がありますのでご注意ください。', '');
-    cognitoUser.verifyAttribute("email", verificationCode, {
-      onSuccess: function(result) {
-        alert("認証に成功しました。");
-        return true;
-      },　
-      onFailure: function(err) {
-        alert(err.message || JSON.stringify(err));
-        return false;
       }
     });
   }
@@ -84,7 +68,7 @@ export default function MyPage() {
     		alert(err.message || JSON.stringify(err));
     		return;
     	}
-      
+    
       cognitoUser.getSession((err, session) => {
         if (err) {
           console.log(err)
@@ -96,31 +80,28 @@ export default function MyPage() {
           } else {
             // console.log("jwtToken", session.idToken.jwtToken);
             // console.log("baseURL", process.env.REACT_APP_COGNITO_API_URL);
-            // メアドが変更されていた場合の処理
-            if (beforeEmailValue !== emailValue) {
-                const app = axiosBase.create({
-                  baseURL: process.env.REACT_APP_COGNITO_API_URL,
-                  headers: {
-                    'Content-Type': 'application/json',
-                    "Authorization": "Bearer " + session.idToken.jwtToken
-                  },
-                  responseType: 'json'
-                });
-                setBeforeEmail(emailValue)
-                app.post('/create',{
-                  username: cognitoUser.username,
-                  email: emailValue,
-                  // TODO: 取得をして、ちゃんとしたものに変更する
-                  shop_id: "shopOrigin"
-                })
-                .then((value) => {
-                  window.alert("変更後のメールアドレスに承認リンクを送信しました。\n変更する場合、そちらのメールアドレスをクリックしてください。");
-                  console.dir("success",value);
-                })
-                .catch((err) => {
-                  console.log("err",err)
-                });
-              }
+            const app = axiosBase.create({
+              // baseURL: process.env.REACT_APP_PUBLIC_COGNITO_API_URL,
+              baseURL: process.env.REACT_APP_COGNITO_API_URL,
+              headers: {
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer " + session.idToken.jwtToken
+              },
+              responseType: 'json'
+            });
+            app.post('/create',{
+              username: cognitoUser.username,
+              email: emailValue,
+              // TODO: 取得をして、ちゃんとしたものに変更する
+              shop_id: "shopOrigin"
+            })
+            .then((value) => {
+              window.alert("変更後のメールアドレスに承認リンクを送信しました。\n変更する場合、そちらのメールアドレスをクリックしてください。");
+              console.dir("success",value);
+            })
+            .catch((err) => {
+              console.log("err",err)
+            });
 
             return session
           }
@@ -155,7 +136,6 @@ export default function MyPage() {
             label="Email"
             type="text"
           />
-          <Link onClick={() => verificateEmail()}>認証コード再入力</Link>
           <Button size="big" submit>送信</Button>
           <Link to="/change_password">パスワードを変更したい方はこちら</Link>
         </FormLayout>
