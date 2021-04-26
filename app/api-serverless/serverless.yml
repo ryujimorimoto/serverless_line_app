@@ -49,6 +49,7 @@ provider:
     SHARED_SECRET: ${env:SHARED_SECRET}
     API_VERSION: ${env:API_VERSION}
     PUBLIC_COGNITO_API_URL: ${env:PUBLIC_COGNITO_API_URL}
+    SENDER_EMAIL: ${env:SENDER_EMAIL}
 functions:
   sendMailTest:
     handler: sendMail.sendMail

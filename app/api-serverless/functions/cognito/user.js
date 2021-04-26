@@ -72,6 +72,13 @@ app.get(`/public${process.env.COGNITO_API_URL}/check/:username`, (req, res) =>{
         });
         return
       };
+      console.log("=====================")
+      console.log(`token in db: ${item.token}, in params: ${query_string.token}`)
+      console.log(query_string.token === item.token)
+      console.log(`shop_id in db: ${item.shop_id}, in params: ${query_string.shop_id}`)
+      console.log(query_string.shop_id === item.shop_id)
+      console.log("=====================")
+      res.json({failure: 'URLが無効です'})
     }
   })
 });
@@ -84,7 +91,9 @@ app.post(`${process.env.COGNITO_API_URL}/create`, (req, res) =>{
   console.log('----- POST /users/create -----');
   console.log("req:", req);
 
-  const token = crypto.randomBytes(64).toString("base64");
+  // 「+」はクエリストリングスだと空白になってしまう
+  // const token = crypto.randomBytes(64).toString("base64");
+  const token = Math.random().toString(32)
   const ses = new AWS.SES({region: process.env.REGION}); //メールを登録したリージョン
   try {
     const params = {
@@ -106,7 +115,7 @@ app.post(`${process.env.COGNITO_API_URL}/create`, (req, res) =>{
 
         // SESにてメールをおくる。
         const mail_params = {
-          Source: 'cognac04@gmail.com',
+          Source: process.env.SENDER_EMAIL,
           Destination: {
             // ToAddresses: ['cognac0004@gmail.com'],
             ToAddresses: [req.body.email], //配列で記述
