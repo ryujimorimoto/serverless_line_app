@@ -31,9 +31,11 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
         - ses:*
+        - cognito-idp:*
       Resource:
         - "arn:aws:dynamodb:ap-northeast-1:*:*"
         - "arn:aws:ses:ap-northeast-1:*"
+        - "arn:aws:cognito-idp:ap-northeast-1:*"
   environment:
     SHOPIFY_API_KEY: ${env:SHOPIFY_API_KEY}
     SHOPIFY_API_SECRET: ${env:SHOPIFY_API_SECRET}
@@ -47,6 +49,7 @@ provider:
     SHARED_SECRET: ${env:SHARED_SECRET}
     API_VERSION: ${env:API_VERSION}
     PUBLIC_COGNITO_API_URL: ${env:PUBLIC_COGNITO_API_URL}
+    SENDER_EMAIL: ${env:SENDER_EMAIL}
 functions:
   sendMailTest:
     handler: sendMail.sendMail
